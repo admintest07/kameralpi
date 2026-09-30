@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RecorderPro - Aplikasi Rekam Kelas Atas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Custom Scrollbar Elegan */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
+        
+        /* Animasi Equalizer */
+        .eq-bar { transition: height 0.05s ease, background-color 0.2s; }
+        
+        /* Animasi Countdown Kustom */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+        .animate-pop { animation: popIn 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+        
+        /* Utils untuk Dropdown Custom */
+        .dropdown-menu { transform-origin: top center; }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-gray-100 h-[100dvh] flex flex-col overflow-hidden bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(55,48,163,0.25),rgba(255,255,255,0))]">
+
+    <header class="bg-white/[0.02] border-b border-white/[0.05] p-2 sm:p-3 flex flex-wrap items-center justify-between gap-3 flex-none z-40 backdrop-blur-xl shadow-sm">
+        
+        <!-- Logo Aplikasi -->
+        <div class="flex items-center gap-3 hidden md:flex">
+            <div class="bg-gradient-to-br from-indigo-500 to-blue-500 w-8 h-8 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.4)] text-white">
+                <i class="fas fa-video text-sm"></i>
+            </div>
+            <h1 class="font-extrabold text-lg tracking-tight text-white">Recorder<span class="text-indigo-400">Pro</span></h1>
+        </div>
+
+        <!-- Wadah Kontrol Menu Atas (Custom Dropdowns) -->
+        <div id="deviceDropdownWrapper" class="flex flex-wrap items-center justify-center md:justify-end gap-2 sm:gap-3 flex-1 transition-opacity duration-300">
+            
+            <button id="btnScreenShare" title="Rekam Layar PC Anda" class="h-9 sm:h-10 px-3 sm:px-4 bg-gray-800 hover:bg-gray-700 border border-white/5 rounded-lg flex items-center gap-2 transition-all text-xs sm:text-sm text-gray-200 shadow-sm">
+                <i class="fas fa-desktop text-indigo-400"></i> <span class="hidden lg:inline font-medium">Rekam Layar</span>
+            </button>
+
+            <!-- Custom Dropdown: Filter Warna -->
+            <div class="relative custom-dropdown" id="filterDropdown">
+                <button class="dropdown-toggle h-9 sm:h-10 px-3 bg-gray-800 hover:bg-gray-700 border border-white/5 rounded-lg flex items-center gap-2 transition-all shadow-sm w-32 sm:w-36">
+                    <i class="fas fa-palette text-indigo-400 text-xs sm:text-sm shrink-0"></i>
+                    <span class="dropdown-label text-xs sm:text-sm text-gray-200 font-medium truncate flex-1 text-left">Normal</span>
+                    <i class="fas fa-chevron-down text-[10px] text-gray-500 shrink-0"></i>
+                </button>
+                <div class="dropdown-menu absolute right-0 top-full mt-2 w-44 bg-gray-800/95 backdrop-blur-2xl border border-white/10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 overflow-hidden">
+                    <div class="p-1.5 flex flex-col gap-0.5 dropdown-menu-content">
+                        <button class="dropdown-item bg-gray-800 text-white px-3 py-2 text-left text-xs sm:text-sm hover:bg-indigo-500 rounded-lg transition-colors" data-value="none">Normal</button>
+                        <button class="dropdown-item bg-gray-800 text-white px-3 py-2 text-left text-xs sm:text-sm hover:bg-indigo-500 rounded-lg transition-colors" data-value="grayscale(100%)">Hitam Putih</button>
+                        <button class="dropdown-item bg-gray-800 text-white px-3 py-2 text-left text-xs sm:text-sm hover:bg-indigo-500 rounded-lg transition-colors" data-value="sepia(100%)">Klasik (Sepia)</button>
+                        <button class="dropdown-item bg-gray-800 text-white px-3 py-2 text-left text-xs sm:text-sm hover:bg-indigo-500 rounded-lg transition-colors" data-value="contrast(150%) saturate(120%)">High Contrast</button>
+                        <button class="dropdown-item bg-gray-800 text-white px-3 py-2 text-left text-xs sm:text-sm hover:bg-indigo-500 rounded-lg transition-colors" data-value="blur(4px)">Sensor (Blur)</button>
+                        <button class="dropdown-item bg-gray-800 text-white px-3 py-2 text-left text-xs sm:text-sm hover:bg-indigo-500 rounded-lg transition-colors" data-value="hue-rotate(90deg)">Alien Mode</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Dropdown: Kamera -->
+            <div class="relative custom-dropdown" id="cameraDropdown">
+                <button class="dropdown-toggle h-9 sm:h-10 px-3 bg-gray-800 hover:bg-gray-700 border border-white/5 rounded-lg flex items-center gap-2 transition-all shadow-sm w-32 sm:w-40">
+                    <i class="fas fa-camera text-blue-400 text-xs sm:text-sm shrink-0"></i>
+                    <span class="dropdown-label text-xs sm:text-sm text-gray-200 font-medium truncate flex-1 text-left">Pilih Kamera</span>
+                    <i class="fas fa-chevron-down text-[10px] text-gray-500 shrink-0"></i>
+                </button>
+                <div class="dropdown-menu absolute right-0 top-full mt-2 w-56 bg-gray-800/95 backdrop-blur-2xl border border-white/10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 overflow-hidden">
+                    <div class="p-1.5 flex flex-col gap-0.5 dropdown-menu-content text-white">
+                        <div class="px-3 py-2 text-xs text-gray-400 italic">Mencari perangkat...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Custom Dropdown: Mikrofon + Noise Toggle -->
+            <div class="flex items-center bg-gray-800 border border-white/5 rounded-lg shadow-sm">
+                <div class="relative custom-dropdown" id="micDropdown">
+                    <button class="dropdown-toggle h-9 sm:h-10 px-3 hover:bg-gray-700 rounded-l-lg flex items-center gap-2 transition-all w-32 sm:w-40 border-r border-white/5">
+                        <i class="fas fa-microphone text-purple-400 text-xs sm:text-sm shrink-0"></i>
+                        <span class="dropdown-label text-xs sm:text-sm text-gray-200 font-medium truncate flex-1 text-left">Pilih Mic</span>
+                        <i class="fas fa-chevron-down text-[10px] text-gray-500 shrink-0"></i>
+                    </button>
+                    <div class="dropdown-menu absolute right-0 top-full mt-2 w-56 bg-gray-800/95 backdrop-blur-2xl border border-white/10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] opacity-0 scale-95 pointer-events-none transition-all duration-200 z-50 overflow-hidden">
+                        <div class="p-1.5 flex flex-col gap-0.5 dropdown-menu-content text-white">
+                            <div class="px-3 py-2 text-xs text-gray-400 italic">Mencari perangkat...</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Toggle Peredam Bising -->
+                <button id="btnNoiseSuppression" title="Peredam Bising (Noise Suppression) ON/OFF" class="h-9 sm:h-10 px-3 hover:bg-gray-700 rounded-r-lg transition-all flex items-center justify-center text-green-400">
+                    <i class="fas fa-ear-listen text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Toggle Mirror (Cermin) -->
+            <div class="h-9 sm:h-10 px-3 bg-gray-800 border border-white/5 rounded-lg flex items-center gap-2 shadow-sm hidden md:flex" title="Mode Cermin (Teks Terbalik)">
+                <i class="fas fa-arrows-alt-h text-gray-400 text-sm"></i>
+                <button id="toggleMirror" class="relative inline-flex h-5 w-9 items-center rounded-full bg-gray-600 transition-colors focus:outline-none">
+                    <span class="translate-x-1 inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform"></span>
+                </button>
+                <span id="mirrorLabel" class="text-[10px] sm:text-xs font-bold text-gray-500 w-6 text-center">OFF</span>
+            </div>
+
+            <!-- Toggle Timestamp -->
+            <div class="h-9 sm:h-10 px-3 bg-gray-800 border border-white/5 rounded-lg flex items-center gap-2 shadow-sm hidden sm:flex" title="Tampilkan Waktu">
+                <i class="far fa-clock text-gray-400 text-sm"></i>
+                <button id="toggleTimestamp" class="relative inline-flex h-5 w-9 items-center rounded-full bg-indigo-500 transition-colors focus:outline-none">
+                    <span class="translate-x-5 inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform"></span>
+                </button>
+                <span id="timestampLabel" class="text-[10px] sm:text-xs font-bold text-indigo-300 w-6 text-center">ON</span>
+            </div>
+
+            <!-- Tombol Hasil -->
+            <button id="btnOpenResults" class="relative h-9 sm:h-10 px-4 bg-gray-800 hover:bg-gray-700 border border-white/5 rounded-lg flex items-center gap-2 transition-all text-xs sm:text-sm shadow-sm text-gray-200 ml-auto md:ml-0">
+                <i class="fas fa-folder-open text-yellow-400"></i>
+                <span class="font-medium">Hasil</span>
+                <span id="resultBadge" class="absolute -top-1 -right-1 flex h-3 w-3 hidden">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col p-3 sm:p-5 relative min-h-0 gap-4">
+        
+        <!-- AREA KAMERA (Premium Border & Glow) -->
+        <div id="videoContainer" class="relative w-full flex-1 bg-black rounded-2xl sm:rounded-[24px] overflow-hidden shadow-2xl ring-1 ring-white/10 min-h-0 group cursor-grab active:cursor-grabbing touch-none z-10">
+            
+            <!-- Elemen Video Tersembunyi (Tidak pakai display:none agar terbaca di HP) -->
+            <video id="rawVideo" class="absolute opacity-0 pointer-events-none w-1 h-1 -z-10" autoplay muted playsinline></video>
+            <video id="pipVideo" class="absolute opacity-0 pointer-events-none w-1 h-1 -z-10" autoplay muted playsinline></video>
+            
+            <!-- Tampilan Kamera Utama (Canvas) -->
+            <canvas id="liveCanvas" class="absolute inset-0 w-full h-full object-contain bg-[#050505]"></canvas>
+            
+            <!-- Overlay Animasi Hitung Mundur -->
+            <div id="countdownOverlay" class="absolute inset-0 z-40 bg-black/60 backdrop-blur-md flex items-center justify-center hidden transition-opacity">
+                <span id="countdownText" class="text-[150px] sm:text-[200px] font-black text-white drop-shadow-[0_0_30px_rgba(99,102,241,0.8)]">3</span>
+            </div>
+
+            <!-- Error State / Menunggu Akses -->
+            <div id="permissionOverlay" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#0b0f19]/95 backdrop-blur-xl p-4 text-center">
+                <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-5 border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                    <i id="camIcon" class="fas fa-camera text-3xl text-gray-400"></i>
+                </div>
+                <h3 id="overlayTitle" class="text-xl font-bold mb-2 text-white">Menunggu Akses</h3>
+                <p id="overlayDesc" class="text-gray-400 max-w-md text-sm mb-6 leading-relaxed">Aplikasi ini berjalan lokal 100% di browser Anda untuk privasi maksimal. Kami membutuhkan izin akses kamera dan mikrofon.</p>
+                <button id="btnGrant" class="bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-400 hover:to-blue-500 text-white px-8 py-3 rounded-xl font-semibold shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all flex items-center gap-2 transform hover:scale-105 active:scale-95">
+                    <i class="fas fa-lock-open text-sm"></i> <span id="btnGrantText">Berikan Akses</span>
+                </button>
+            </div>
+
+            <!-- Timer Perekaman (Kiri Atas) -->
+            <div class="absolute top-4 left-4 z-20 flex flex-col gap-2 pointer-events-none">
+                <div id="recordingIndicator" class="bg-black/40 backdrop-blur-md text-white text-sm px-4 py-2 rounded-full border border-white/10 flex items-center shadow-lg transition-opacity duration-300 opacity-0">
+                    <div id="recDot" class="w-2.5 h-2.5 bg-red-500 rounded-full mr-3 shadow-[0_0_10px_rgba(239,68,68,1)] animate-pulse"></div>
+                    <span id="timerText" class="font-mono tracking-widest font-bold">00:00:00</span>
+                </div>
+            </div>
+
+            <!-- Tombol Picture in Picture (Kanan Atas) -->
+            <button id="btnPip" title="Layar Mengambang (PiP)" class="absolute top-4 right-4 z-20 bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/10 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-lg hidden">
+                <i class="fas fa-external-link-alt text-sm"></i>
+            </button>
+
+            <!-- Slider Zoom & Pan (Kanan Tengah) -->
+            <div id="zoomControls" class="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 flex flex-col items-center gap-2 hidden transition-opacity">
+                <div class="bg-black/40 backdrop-blur-md border border-white/10 rounded-full py-4 px-2.5 flex flex-col items-center gap-4 shadow-lg">
+                    <button id="btnZoomIn" class="text-gray-300 hover:text-white"><i class="fas fa-plus text-xs"></i></button>
+                    <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1" class="h-24 w-1.5 bg-gray-600 rounded-lg appearance-none cursor-pointer" style="writing-mode: bt-lr; -webkit-appearance: slider-vertical;">
+                    <button id="btnZoomOut" class="text-gray-300 hover:text-white"><i class="fas fa-minus text-xs"></i></button>
+                </div>
+                <button id="btnResetZoom" class="bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg text-gray-300 hidden transition-all">1X</button>
+            </div>
+
+            <!-- Petunjuk Tracking (Geser Layar) -->
+            <div id="panHint" class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-indigo-600/90 backdrop-blur-md text-white text-xs px-4 py-2 rounded-full border border-indigo-400/50 z-20 hidden transition-opacity duration-500 flex items-center gap-2 shadow-lg pointer-events-none">
+                <i class="fas fa-arrows-alt"></i> Klik & Geser untuk Tracking Wajah
+            </div>
+
+            <!-- Audio Equalizer Mungil (Kiri Bawah) -->
+            <div id="audioVisualizerContainer" class="absolute bottom-4 left-4 z-20 flex items-center justify-center bg-black/60 opacity-75 hover:opacity-100 hover:bg-black/80 backdrop-blur-md border border-white/10 px-4 py-2.5 rounded-xl shadow-lg transition-all hidden w-36 md:w-48 h-10 group-hover:opacity-100">
+                <div id="eqBars" class="flex items-end h-full gap-1 w-full">
+                    <!-- Batang EQ akan di-generate via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex-none flex justify-center items-center gap-4 sm:gap-6 z-10 py-1">
+            <!-- MUTE MIC -->
+            <button id="btnMainMute" title="Matikan Mikrofon" disabled class="bg-white/5 border border-white/10 hover:bg-white/10 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-lg shadow-lg transition-all focus:outline-none disabled:opacity-30 disabled:cursor-not-allowed">
+                <i class="fas fa-microphone"></i>
+            </button>
+            
+            <!-- JEDA (Pause) -->
+            <button id="btnPause" title="Jeda Perekaman" disabled class="bg-white/5 border border-white/10 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-lg shadow-lg transition-all focus:outline-none">
+                <i class="fas fa-pause"></i>
+            </button>
+            
+            <!-- REKAM (Record) - Tombol Utama -->
+            <button id="btnRecord" title="Mulai Merekam" disabled class="bg-gradient-to-br from-indigo-500 to-blue-600 hover:from-indigo-400 hover:to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-2xl sm:text-3xl shadow-[0_0_30px_rgba(79,70,229,0.5)] border-4 border-white/10 transition-all transform hover:scale-105 active:scale-95 focus:outline-none">
+                <i class="fas fa-video drop-shadow-md"></i>
+            </button>
+            
+            <!-- BERHENTI (Stop) -->
+            <button id="btnStop" title="Berhenti Merekam" disabled class="bg-white/5 border border-white/10 hover:bg-red-900/40 hover:text-red-400 hover:border-red-500/50 disabled:opacity-30 disabled:cursor-not-allowed text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-lg shadow-lg transition-all focus:outline-none">
+                <i class="fas fa-stop"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- MODAL HASIL REKAMAN -->
+    <div id="resultsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex flex-col justify-end sm:justify-center items-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-[#0f1423] border border-white/10 w-full sm:w-[90%] max-w-4xl max-h-[90dvh] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden transform translate-y-full sm:translate-y-4 sm:scale-95 transition-transform duration-300" id="resultsModalContent">
+            <!-- Header Modal -->
+            <div class="flex justify-between items-center p-5 border-b border-white/5 bg-white/[0.02] flex-none backdrop-blur-md">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2"><i class="fas fa-folder-open text-yellow-400"></i> Hasil Rekaman Anda</h2>
+                <button id="btnCloseResults" class="text-gray-400 hover:text-white w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <!-- Konten Modal -->
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col min-h-[40vh] bg-gradient-to-b from-[#0f1423] to-[#080b13]">
+                <div id="emptyState" class="flex flex-col items-center justify-center py-16 text-gray-500 h-full">
+                    <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-film text-3xl opacity-50"></i>
+                    </div>
+                    <p class="font-medium">Belum ada rekaman saat ini.</p>
+                </div>
+                <div id="resultContent" class="hidden flex-col gap-5 w-full">
+                    <div class="w-full bg-black rounded-2xl overflow-hidden border border-white/10 shadow-inner relative flex-none ring-1 ring-white/5">
+                        <video id="playbackVideo" class="w-full h-auto max-h-[50vh] object-contain" controls playsinline></video>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2 flex-none">
+                        <button id="btnDownload" class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white py-3.5 px-4 rounded-xl font-semibold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] flex items-center justify-center gap-2">
+                            <i class="fas fa-download"></i> Simpan ke Komputer (.mp4)
+                        </button>
+                        <button id="btnDrive" class="bg-white hover:bg-gray-100 text-gray-900 py-3.5 px-4 rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" alt="Drive" class="w-5 h-5">
+                            Simpan ke Google Drive
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const rawVideo = document.getElementById('rawVideo');
+        const pipVideo = document.getElementById('pipVideo');
+        const liveCanvas = document.getElementById('liveCanvas');
+        const ctx = liveCanvas.getContext('2d', { alpha: false, willReadFrequently: true });
+        const playbackVideo = document.getElementById('playbackVideo');
+        
+        const btnGrant = document.getElementById('btnGrant');
+        const btnRecord = document.getElementById('btnRecord');
+        const btnStop = document.getElementById('btnStop');
+        const btnPause = document.getElementById('btnPause');
+        const btnMainMute = document.getElementById('btnMainMute');
+        
+        const permissionOverlay = document.getElementById('permissionOverlay');
+        const recordingIndicator = document.getElementById('recordingIndicator');
+        const timerText = document.getElementById('timerText');
+        const recDot = document.getElementById('recDot');
+        
+        const btnOpenResults = document.getElementById('btnOpenResults');
+        const btnCloseResults = document.getElementById('btnCloseResults');
+        const resultsModal = document.getElementById('resultsModal');
+        const resultsModalContent = document.getElementById('resultsModalContent');
+        const emptyState = document.getElementById('emptyState');
+        const resultContent = document.getElementById('resultContent');
+        const resultBadge = document.getElementById('resultBadge');
+        const btnDownload = document.getElementById('btnDownload');
+        const btnDrive = document.getElementById('btnDrive');
+
+        const deviceDropdownWrapper = document.getElementById('deviceDropdownWrapper');
+        const btnScreenShare = document.getElementById('btnScreenShare');
+        const btnNoiseSuppression = document.getElementById('btnNoiseSuppression');
+        const countdownOverlay = document.getElementById('countdownOverlay');
+        const countdownText = document.getElementById('countdownText');
+
+        const toggleTimestamp = document.getElementById('toggleTimestamp');
+        const toggleKnob = toggleTimestamp.querySelector('span');
+        const timestampLabel = document.getElementById('timestampLabel');
+        
+        const toggleMirror = document.getElementById('toggleMirror');
+        const toggleMirrorKnob = toggleMirror.querySelector('span');
+        const mirrorLabel = document.getElementById('mirrorLabel');
+
+        const btnPip = document.getElementById('btnPip');
+        
+        const audioVisualizerContainer = document.getElementById('audioVisualizerContainer');
+        const eqBarsContainer = document.getElementById('eqBars');
+        const zoomControls = document.getElementById('zoomControls');
+        const zoomSlider = document.getElementById('zoomSlider');
+        const btnZoomIn = document.getElementById('btnZoomIn');
+        const btnZoomOut = document.getElementById('btnZoomOut');
+        const btnResetZoom = document.getElementById('btnResetZoom');
+        const videoContainer = document.getElementById('videoContainer');
+        const panHint = document.getElementById('panHint');
+
+        // State Variables
+        let stream = null;
+        let screenStream = null;
+        let isScreenSharing = false;
+        let isNoiseSuppression = true;
+        let currentFilter = 'none';
+
+        let selectedCameraId = null;
+        let selectedMicId = null;
+
+        let audioContext, analyser, dataArray;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+        let isPaused = false;
+        let timerInterval = null;
+        let seconds = 0;
+        let blobUrl = null;
+        
+        let isTimestampEnabled = true;
+        let isMirrored = false; // Bawaan sekarang OFF agar teks mudah dibaca
+        let isMuted = false;
+        let reqAnimId = null;
+        let eqAnimId = null;
+        
+        let currentZoom = 1;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let startDragX = 0;
+        let startDragY = 0;
+
+        // Dropdown Logic Custom UI
+        const dropdowns = document.querySelectorAll('.custom-dropdown');
+        let activeDropdown = null;
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+            });
+            activeDropdown = null;
+        }
+
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const menu = dropdown.querySelector('.dropdown-menu');
+            
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if(isRecording) return; // Kunci dropdown saat merekam
+                
+                const isOpen = !menu.classList.contains('opacity-0');
+                closeAllDropdowns();
+                if (!isOpen) {
+                    menu.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+                    activeDropdown = dropdown;
+                }
+            });
+        });
+
+        document.addEventListener('click', closeAllDropdowns);
+
+        const filterDropdown = document.getElementById('filterDropdown');
+        const filterLabel = filterDropdown.querySelector('.dropdown-label');
+        filterDropdown.querySelectorAll('.dropdown-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentFilter = btn.dataset.value;
+                filterLabel.innerText = btn.innerText;
+                closeAllDropdowns();
+            });
+        });
+
+        async function getDevices() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                
+                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                const audioDevices = devices.filter(d => d.kind === 'audioinput');
+                
+                populateCustomDropdown('cameraDropdown', videoDevices, (val) => {
+                    selectedCameraId = val;
+                    if(!isRecording) initCamera(false);
+                });
+                
+                populateCustomDropdown('micDropdown', audioDevices, (val) => {
+                    selectedMicId = val;
+                    if(!isRecording) initCamera(false);
+                });
+            } catch (err) { console.error("Gagal mendata perangkat: ", err); }
+        }
+
+        function populateCustomDropdown(containerId, items, onSelect) {
+            const container = document.getElementById(containerId);
+            const menuContent = container.querySelector('.dropdown-menu-content');
+            const labelEl = container.querySelector('.dropdown-label');
+            menuContent.innerHTML = '';
+            
+            if (items.length === 0) {
+                 menuContent.innerHTML = '<div class="px-3 py-2 text-xs text-gray-400 italic">Tidak ditemukan</div>';
+                 return;
+            }
+            
+            let currentSelected = (containerId === 'cameraDropdown') ? selectedCameraId : selectedMicId;
+            let hasSelected = items.some(d => d.deviceId === currentSelected);
+            if (!hasSelected && items.length > 0) {
+                 if (containerId === 'cameraDropdown') selectedCameraId = items[0].deviceId;
+                 else selectedMicId = items[0].deviceId;
+            }
+            
+            items.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'dropdown-item bg-gray-800 text-white w-full text-left px-3 py-2 text-xs sm:text-sm hover:bg-indigo-500 rounded-lg transition-colors truncate flex items-center gap-2';
+                
+                const iconClass = containerId === 'cameraDropdown' ? 'fa-camera text-blue-400' : 'fa-microphone text-purple-400';
+                const itemLabel = item.label || `Device ${index + 1}`;
+                
+                btn.innerHTML = `<i class="fas ${iconClass} text-[10px] opacity-70"></i> ${itemLabel}`;
+                
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    labelEl.innerText = itemLabel;
+                    onSelect(item.deviceId);
+                    closeAllDropdowns();
+                };
+                menuContent.appendChild(btn);
+                
+                if (item.deviceId === (containerId === 'cameraDropdown' ? selectedCameraId : selectedMicId)) {
+                    labelEl.innerText = itemLabel;
+                }
+            });
+        }
+
+        async function initCamera(isInitial = false) {
+            try {
+                if (window.location.protocol === 'file:' && !navigator.mediaDevices?.getUserMedia) {
+                    throw new Error("SECURE_CONTEXT_LOCAL");
+                }
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error("SECURE_CONTEXT");
+                }
+
+                if (stream) { stream.getTracks().forEach(track => track.stop()); }
+                if(isScreenSharing) stopScreenShare();
+
+                let videoConstraint = { facingMode: "user" };
+                if (selectedCameraId) videoConstraint = { deviceId: { exact: selectedCameraId } };
+                
+                let audioConstraint = { noiseSuppression: isNoiseSuppression, echoCancellation: isNoiseSuppression };
+                if (selectedMicId) audioConstraint.deviceId = { exact: selectedMicId };
+
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: videoConstraint, 
+                    audio: audioConstraint 
+                }).catch(async (e) => {
+                    console.warn("Gagal akses kamera & mic bersamaan, mencoba audio saja...", e);
+                    return await navigator.mediaDevices.getUserMedia({ audio: audioConstraint, video: false });
+                });
+
+                rawVideo.srcObject = stream;
+                rawVideo.play().catch(e => console.warn("Video Play Error:", e));
+                
+                rawVideo.onloadedmetadata = () => {
+                    liveCanvas.width = rawVideo.videoWidth || 1280;
+                    liveCanvas.height = rawVideo.videoHeight || 720;
+                    if(!reqAnimId) drawCanvas();
+                };
+
+                const audioTracks = stream.getAudioTracks();
+                if(audioTracks.length > 0) {
+                    audioTracks[0].enabled = !isMuted;
+                }
+
+                permissionOverlay.classList.add('hidden');
+                btnRecord.disabled = false;
+                btnMainMute.disabled = false;
+                audioVisualizerContainer.classList.remove('hidden');
+                btnPip.classList.remove('hidden');
+                zoomControls.classList.remove('hidden');
+
+                if (isInitial) await getDevices();
+                setupAudioVisualizer(stream);
+
+            } catch (err) {
+                console.error("Error Akses Media: ", err);
+                showErrorOverlay(err);
+            }
+        }
+
+        function showErrorOverlay(err) {
+            const title = document.getElementById('overlayTitle');
+            const desc = document.getElementById('overlayDesc');
+            const icon = document.getElementById('camIcon');
+            const btnText = document.getElementById('btnGrantText');
+            
+            permissionOverlay.classList.remove('hidden');
+            btnGrant.classList.remove('hidden'); 
+            btnText.innerText = "Coba Lagi";
+            btnGrant.querySelector('i').className = "fas fa-sync-alt text-sm";
+            
+            if (err.message === "SECURE_CONTEXT_LOCAL") {
+                title.innerText = "Akses Diblokir Security Browser";
+                desc.innerHTML = "Karena file ini dibuka lokal (<code>file:///</code>), browser memblokir kamera demi keamanan.<br><br><b>Solusi Pro:</b> Buka menggunakan ekstensi <i>Live Server</i> (VSCode), atau unggah ke hosting gratis (Vercel/Netlify).";
+                icon.className = "fas fa-shield-alt text-4xl text-yellow-500 drop-shadow-md";
+                btnGrant.classList.add('hidden'); 
+            } else if (err.name === 'NotAllowedError' || err.name === 'NotReadableError') {
+                title.innerText = "Akses Kamera Diblokir";
+                desc.innerHTML = "Anda menolak izin atau kamera sedang dipakai aplikasi lain (Zoom/Meet).<br><br>Silakan klik ikon gembok/kamera di URL Bar atas, setujui izin, dan muat ulang halaman.";
+                icon.className = "fas fa-lock text-4xl text-red-500 drop-shadow-md";
+                btnGrant.classList.replace('from-indigo-500', 'from-red-500');
+                btnGrant.classList.replace('to-blue-600', 'to-orange-500');
+            } else {
+                title.innerText = "Perangkat Tidak Terdeteksi";
+                desc.innerText = "Kamera atau Mikrofon tidak ditemukan di perangkat Anda. Pastikan sudah terpasang dengan benar.";
+                icon.className = "fas fa-video-slash text-4xl text-yellow-500 drop-shadow-md";
+            }
+        }
+
+        btnGrant.addEventListener('click', () => {
+            btnGrant.classList.replace('from-red-500', 'from-indigo-500');
+            btnGrant.classList.replace('to-orange-500', 'to-blue-600');
+            btnGrant.querySelector('i').className = "fas fa-lock-open text-sm";
+            document.getElementById('btnGrantText').innerText = "Meminta Akses...";
+            
+            initCamera(true);
+        });
+
+        btnNoiseSuppression.addEventListener('click', () => {
+            if(isRecording) return;
+            isNoiseSuppression = !isNoiseSuppression;
+            if(isNoiseSuppression) {
+                btnNoiseSuppression.classList.replace('text-gray-500', 'text-green-400');
+            } else {
+                btnNoiseSuppression.classList.replace('text-green-400', 'text-gray-500');
+            }
+            initCamera(false); 
+        });
+
+        async function startScreenShare() {
+            try {
+                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+                screenStream.getVideoTracks()[0].onended = stopScreenShare;
+                
+                rawVideo.srcObject = screenStream;
+                rawVideo.play().catch(e => console.warn(e));
+                isScreenSharing = true;
+                
+                btnScreenShare.classList.add('bg-indigo-600', 'text-white', 'border-indigo-500');
+                btnScreenShare.classList.remove('bg-gray-800', 'text-gray-200');
+                btnScreenShare.innerHTML = '<i class="fas fa-desktop text-white"></i> <span class="hidden lg:inline font-medium">Berhenti Bagi</span>';
+                
+                updateZoom(1); 
+            } catch(e) { console.error("Gagal share screen:", e); }
+        }
+
+        function stopScreenShare() {
+            if(screenStream) screenStream.getTracks().forEach(t => t.stop());
+            if(stream) {
+                rawVideo.srcObject = stream;
+                rawVideo.play().catch(e => console.warn(e));
+            }
+            isScreenSharing = false;
+            
+            btnScreenShare.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-500');
+            btnScreenShare.classList.add('bg-gray-800', 'text-gray-200');
+            btnScreenShare.innerHTML = '<i class="fas fa-desktop text-indigo-400"></i> <span class="hidden lg:inline font-medium">Rekam Layar</span>';
+        }
+
+        btnScreenShare.addEventListener('click', () => {
+            if(isRecording) return;
+            if(isScreenSharing) stopScreenShare();
+            else startScreenShare();
+        });
+
+        function drawCanvas() {
+            reqAnimId = requestAnimationFrame(drawCanvas);
+            if (!rawVideo.videoWidth) return;
+
+            const w = liveCanvas.width;
+            const h = liveCanvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+            ctx.save();
+
+            // Menerapkan fitur Mirror jika tombol ON
+            if (!isScreenSharing && isMirrored) {
+                ctx.translate(w, 0);
+                ctx.scale(-1, 1);
+            }
+
+            const maxPanX = (w * currentZoom - w) / 2;
+            const maxPanY = (h * currentZoom - h) / 2;
+            panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+            panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+
+            ctx.translate(w/2, h/2);
+            ctx.scale(currentZoom, currentZoom);
+            
+            // Logika pan (geser) beradaptasi dengan status cermin
+            if(!isScreenSharing && isMirrored) {
+                ctx.translate(-panX, panY); 
+            } else {
+                ctx.translate(panX, panY);
+            }
+
+            ctx.filter = currentFilter;
+            ctx.drawImage(rawVideo, -w/2, -h/2, w, h);
+            ctx.restore();
+
+            if (isTimestampEnabled) {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('id-ID');
+                const dateStr = now.toLocaleDateString('id-ID', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+                const textStr = `${dateStr} | ${timeStr}`;
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.lineWidth = Math.max(3, w * 0.003); 
+                
+                const fontSize = Math.max(18, w * 0.025);
+                ctx.font = `600 ${fontSize}px Inter, sans-serif`;
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'bottom';
+                
+                const paddingRight = w * 0.02;
+                const paddingBottom = h * 0.02;
+
+                ctx.strokeText(textStr, w - paddingRight, h - paddingBottom);
+                ctx.fillText(textStr, w - paddingRight, h - paddingBottom);
+            }
+        }
+
+        function updateZoom(val) {
+            currentZoom = parseFloat(val);
+            zoomSlider.value = currentZoom;
+            
+            if (currentZoom > 1) {
+                btnResetZoom.classList.remove('hidden');
+                if(!isRecording) {
+                    panHint.classList.remove('hidden');
+                    setTimeout(() => panHint.classList.add('hidden'), 3000);
+                }
+            } else {
+                btnResetZoom.classList.add('hidden');
+                panX = 0; panY = 0;
+            }
+        }
+
+        zoomSlider.addEventListener('input', (e) => updateZoom(e.target.value));
+        btnZoomIn.addEventListener('click', () => updateZoom(Math.min(3, currentZoom + 0.2)));
+        btnZoomOut.addEventListener('click', () => updateZoom(Math.max(1, currentZoom - 0.2)));
+        btnResetZoom.addEventListener('click', () => updateZoom(1));
+
+        videoContainer.addEventListener('mousedown', (e) => {
+            if (currentZoom <= 1) return;
+            isDragging = true;
+            startDragX = e.clientX; startDragY = e.clientY;
+            videoContainer.classList.add('cursor-grabbing');
+        });
+        videoContainer.addEventListener('touchstart', (e) => {
+            if (currentZoom <= 1) return;
+            isDragging = true;
+            startDragX = e.touches[0].clientX; startDragY = e.touches[0].clientY;
+        }, {passive: true});
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            panX -= (e.clientX - startDragX) * 1.5; 
+            panY += (e.clientY - startDragY) * 1.5; 
+            startDragX = e.clientX; startDragY = e.clientY;
+        });
+        window.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            panX -= (e.touches[0].clientX - startDragX) * 1.5; 
+            panY += (e.touches[0].clientY - startDragY) * 1.5; 
+            startDragX = e.touches[0].clientX; startDragY = e.touches[0].clientY;
+        }, {passive: true});
+
+        window.addEventListener('mouseup', () => { isDragging = false; videoContainer.classList.remove('cursor-grabbing'); });
+        window.addEventListener('touchend', () => { isDragging = false; });
+
+        async function setupAudioVisualizer(stream) {
+            if(!stream || stream.getAudioTracks().length === 0) return; 
+
+            try {
+                if(audioContext && audioContext.state !== 'closed') {
+                    await audioContext.close();
+                }
+                
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 64; 
+                source.connect(analyser);
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
+                eqBarsContainer.innerHTML = '';
+                for(let i=0; i<15; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'flex-1 bg-green-400 rounded-full eq-bar shadow-[0_0_5px_rgba(74,222,128,0.5)]';
+                    bar.style.height = '10%';
+                    eqBarsContainer.appendChild(bar);
+                }
+                drawVisualizer();
+            } catch(e) {
+                console.warn("Visualizer gagal dimuat:", e);
+            }
+        }
+
+        function drawVisualizer() {
+            if(!analyser) return;
+            eqAnimId = requestAnimationFrame(drawVisualizer);
+            
+            analyser.getByteFrequencyData(dataArray);
+            const bars = eqBarsContainer.children;
+            if(bars.length === 0) return;
+            
+            let sum = 0;
+            for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+            const avg = sum / dataArray.length;
+            
+            let colorClass = 'bg-green-400 shadow-[0_0_5px_rgba(74,222,128,0.5)]';
+            if(avg > 150) colorClass = 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.8)]';
+            else if (avg > 100) colorClass = 'bg-yellow-400 shadow-[0_0_5px_rgba(250,204,21,0.5)]';
+
+            for(let i=0; i<bars.length; i++) {
+                let value = dataArray[i + 2] || 0; 
+                let heightPercent = Math.max(15, (value / 255) * 100);
+                
+                bars[i].style.height = `${heightPercent}%`;
+                bars[i].className = `flex-1 rounded-full eq-bar ${colorClass}`;
+                if (isMuted) {
+                    bars[i].style.height = '10%';
+                    bars[i].className = `flex-1 rounded-full eq-bar bg-white/20`;
+                }
+            }
+        }
+
+        btnMainMute.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if(stream && stream.getAudioTracks().length > 0) {
+                stream.getAudioTracks()[0].enabled = !isMuted;
+            }
+            
+            if(isMuted) {
+                btnMainMute.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+                btnMainMute.classList.replace('bg-white/5', 'bg-red-500/20');
+                btnMainMute.classList.replace('text-white', 'text-red-400');
+                btnMainMute.classList.replace('border-white/10', 'border-red-500/50');
+            } else {
+                btnMainMute.innerHTML = '<i class="fas fa-microphone"></i>';
+                btnMainMute.classList.replace('bg-red-500/20', 'bg-white/5');
+                btnMainMute.classList.replace('text-red-400', 'text-white');
+                btnMainMute.classList.replace('border-red-500/50', 'border-white/10');
+            }
+        });
+
+        function formatTime(sec) {
+            const h = Math.floor(sec / 3600).toString().padStart(2, '0');
+            const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            return h !== '00' ? `${h}:${m}:${s}` : `${m}:${s}`;
+        }
+
+        function updateTimer() {
+            seconds++;
+            timerText.innerText = formatTime(seconds);
+        }
+        
+        function toggleDeviceLock(isLocked) {
+            deviceDropdownWrapper.classList.toggle('opacity-40', isLocked);
+            deviceDropdownWrapper.classList.toggle('pointer-events-none', isLocked);
+        }
+
+        btnRecord.addEventListener('click', () => {
+            let count = 3;
+            countdownOverlay.classList.remove('hidden');
+            countdownText.innerText = count;
+            countdownText.classList.add('animate-pop');
+
+            btnRecord.disabled = true;
+
+            const countInterval = setInterval(() => {
+                count--;
+                if(count > 0) {
+                    countdownText.innerText = count;
+                } else {
+                    clearInterval(countInterval);
+                    countdownOverlay.classList.add('hidden');
+                    countdownText.classList.remove('animate-pop');
+                    executeRecording(); 
+                }
+            }, 1000);
+        });
+
+        function executeRecording() {
+            recordedChunks = [];
+            const canvasStream = liveCanvas.captureStream ? liveCanvas.captureStream(30) : (liveCanvas.mozCaptureStream ? liveCanvas.mozCaptureStream(30) : null);
+            
+            if(!canvasStream) {
+                alert("Browser Anda tidak mendukung perekaman kanvas.");
+                btnRecord.disabled = false;
+                return;
+            }
+
+            if(stream && stream.getAudioTracks().length > 0) {
+                canvasStream.addTrack(stream.getAudioTracks()[0]);
+            }
+
+            try {
+                let options = { mimeType: 'video/webm;codecs=vp9,opus' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/webm;codecs=vp8,opus' };
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/mp4' }; 
+                
+                mediaRecorder = new MediaRecorder(canvasStream, options);
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) recordedChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/mp4' }); 
+                    if(blobUrl) URL.revokeObjectURL(blobUrl);
+                    blobUrl = URL.createObjectURL(blob);
+                    
+                    playbackVideo.src = blobUrl;
+                    emptyState.classList.add('hidden');
+                    resultContent.classList.remove('hidden');
+                    resultContent.classList.add('flex');
+                    
+                    resultBadge.classList.remove('hidden');
+                    toggleDeviceLock(false); 
+                };
+
+                toggleDeviceLock(true); 
+                mediaRecorder.start();
+                
+                isRecording = true;
+                isPaused = false;
+                seconds = 0;
+                timerText.innerText = "00:00";
+                
+                recordingIndicator.classList.remove('opacity-0');
+                btnRecord.classList.add('hidden');
+                
+                btnPause.disabled = false;
+                btnStop.disabled = false;
+                
+                timerInterval = setInterval(updateTimer, 1000);
+
+            } catch (e) {
+                alert("Gagal memulai rekaman. Browser Anda mungkin tidak mendukung fitur ini.");
+                console.error(e);
+                btnRecord.disabled = false;
+                toggleDeviceLock(false);
+            }
+        }
+
+        btnPause.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.pause();
+                clearInterval(timerInterval);
+                recDot.classList.remove('bg-red-500', 'animate-pulse');
+                recDot.classList.add('bg-yellow-400');
+                timerText.classList.add('text-yellow-400');
+                btnPause.innerHTML = '<i class="fas fa-play"></i>';
+                btnPause.classList.replace('bg-white/5', 'bg-yellow-500/30');
+                btnPause.classList.replace('border-white/10', 'border-yellow-500/50');
+                isPaused = true;
+            } else if (mediaRecorder && mediaRecorder.state === "paused") {
+                mediaRecorder.resume();
+                timerInterval = setInterval(updateTimer, 1000);
+                recDot.classList.add('bg-red-500', 'animate-pulse');
+                recDot.classList.remove('bg-yellow-400');
+                timerText.classList.remove('text-yellow-400');
+                btnPause.innerHTML = '<i class="fas fa-pause"></i>';
+                btnPause.classList.replace('bg-yellow-500/30', 'bg-white/5');
+                btnPause.classList.replace('border-yellow-500/50', 'border-white/10');
+                isPaused = false;
+            }
+        });
+
+        btnStop.addEventListener('click', () => {
+            if(mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+            clearInterval(timerInterval);
+            
+            isRecording = false;
+            recordingIndicator.classList.add('opacity-0');
+            timerText.innerText = "00:00"; 
+            
+            btnRecord.classList.remove('hidden');
+            btnRecord.disabled = false;
+            btnPause.disabled = true;
+            btnStop.disabled = true;
+            
+            recDot.classList.add('bg-red-500', 'animate-pulse');
+            recDot.classList.remove('bg-yellow-400');
+            timerText.classList.remove('text-yellow-400');
+            btnPause.innerHTML = '<i class="fas fa-pause"></i>';
+            btnPause.classList.replace('bg-yellow-500/30', 'bg-white/5');
+            btnPause.classList.replace('border-yellow-500/50', 'border-white/10');
+        });
+
+        // Toggle Timestamp Button
+        toggleTimestamp.addEventListener('click', () => {
+            if(isRecording) return; 
+            isTimestampEnabled = !isTimestampEnabled;
+            if (isTimestampEnabled) {
+                toggleTimestamp.classList.replace('bg-gray-600', 'bg-indigo-500');
+                toggleKnob.classList.replace('translate-x-1', 'translate-x-5');
+                timestampLabel.innerText = "ON";
+                timestampLabel.classList.replace('text-gray-500', 'text-indigo-300');
+            } else {
+                toggleTimestamp.classList.replace('bg-indigo-500', 'bg-gray-600');
+                toggleKnob.classList.replace('translate-x-5', 'translate-x-1');
+                timestampLabel.innerText = "OFF";
+                timestampLabel.classList.replace('text-indigo-300', 'text-gray-500');
+            }
+        });
+
+        // Toggle Mirror Button
+        toggleMirror.addEventListener('click', () => {
+            if(isRecording) return; 
+            isMirrored = !isMirrored;
+            if (isMirrored) {
+                toggleMirror.classList.replace('bg-gray-600', 'bg-indigo-500');
+                toggleMirrorKnob.classList.replace('translate-x-1', 'translate-x-5');
+                mirrorLabel.innerText = "ON";
+                mirrorLabel.classList.replace('text-gray-500', 'text-indigo-300');
+            } else {
+                toggleMirror.classList.replace('bg-indigo-500', 'bg-gray-600');
+                toggleMirrorKnob.classList.replace('translate-x-5', 'translate-x-1');
+                mirrorLabel.innerText = "OFF";
+                mirrorLabel.classList.replace('text-indigo-300', 'text-gray-500');
+            }
+        });
+
+        btnPip.addEventListener('click', async () => {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    const pipStream = liveCanvas.captureStream ? liveCanvas.captureStream(30) : (liveCanvas.mozCaptureStream ? liveCanvas.mozCaptureStream(30) : null);
+                    if(pipStream) {
+                        pipVideo.srcObject = pipStream;
+                        await pipVideo.play().catch(e => console.warn(e)); 
+                        await pipVideo.requestPictureInPicture();
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+                alert("Browser Anda tidak mendukung fitur Layar Mengambang untuk stream ini.");
+            }
+        });
+
+        function openResults() {
+            resultsModal.classList.remove('opacity-0', 'pointer-events-none');
+            resultsModalContent.classList.remove('translate-y-full', 'sm:scale-95', 'sm:translate-y-4');
+            resultBadge.classList.add('hidden'); 
+        }
+
+        function closeResults() {
+            resultsModal.classList.add('opacity-0', 'pointer-events-none');
+            resultsModalContent.classList.add('translate-y-full', 'sm:scale-95', 'sm:translate-y-4');
+            playbackVideo.pause(); 
+        }
+
+        btnOpenResults.addEventListener('click', openResults);
+        btnCloseResults.addEventListener('click', closeResults);
+        resultsModal.addEventListener('click', (e) => {
+            if(e.target === resultsModal) closeResults();
+        });
+
+        btnDownload.addEventListener('click', () => {
+            if (!blobUrl) return;
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = blobUrl;
+            const filename = `Rekaman_${new Date().toISOString().slice(0,10).replace(/-/g,'')}_${new Date().toLocaleTimeString('id-ID').replace(/\./g,'')}.mp4`;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        btnDrive.addEventListener('click', () => {
+            if (!blobUrl) return;
+            const userConfirmed = confirm("Fitur Simpan ke Google Drive membutuhkan integrasi API Key khusus.\n\nKarena ini versi demo, file Anda akan diunduh ke komputer secara otomatis. Lanjutkan?");
+            if (userConfirmed) btnDownload.click();
+        });
+    </script>
+</body>
+</html>
